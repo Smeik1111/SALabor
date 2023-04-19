@@ -8,7 +8,7 @@ import pandas as pd
 
 
 directory = "/home/xy/uniSo2023/SALabor/"
-download_path = os.path.join(directory, 'downloads/')
+download_path = os.path.join(directory, 'sa_labor_project/downloads/')
 
 for filename in os.listdir(download_path):
     if filename.endswith(".nc"):

@@ -3,7 +3,7 @@ import os
 
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 directory = '/home/xy/uniSo2023/SALabor/'
-download_path = os.path.join(directory, 'downloads/')
+download_path = os.path.join(directory, 'sa_labor_project/downloads/')
 # Set up the API credentials
 username = 's5pguest'
 password = 's5pguest'
