@@ -1,13 +1,13 @@
 import argparse
 import os
 
-import pandas
-import xarray as xarray
 from django.core.management import BaseCommand
 from sentinelsat import SentinelAPI, geojson_to_wkt, read_geojson
 
-from Sentinel5p_download import password, username, url
+from projectApp.models import Sentinel5PData
 from sa_labor_project import settings
+
+
 
 
 class Command(BaseCommand):
@@ -15,8 +15,11 @@ class Command(BaseCommand):
     username = 's5pguest'
     password = 's5pguest'
     url = 'https://s5phub.copernicus.eu/dhus/'
+    timespan_start = 'NOW-10DAYS'
+    timespan_end = 'NOW'
+
     def add_arguments(self, parser):
-        parser.add_argument('-f', '--force', action=argparse.BooleanOptionalAction, help='Override existing data', )
+        parser.add_argument('-f', '--force', action=argparse.BooleanOptionalAction, help='Dont check for existing data', )
         parser.add_argument('-p', '--path', type=str, help='Path to download folder', )
 
 
@@ -29,13 +32,13 @@ class Command(BaseCommand):
             if file.endswith('.incomplete'):
                 print(f'removing incomplete download {file}')
                 os.remove(os.path.join(download_path, file))
-        api = SentinelAPI(username, password, url)
+        api = SentinelAPI(self.username, self.password, self.url)
         # Define the area of interest
         aoi_geojson = settings.GEOJSON_PATH
         aoi = geojson_to_wkt(read_geojson(aoi_geojson))
         # Search for Sentinel-5P data based on the area of interest and date range
         products = api.query(aoi,
-                             date=('NOW-10DAYS', 'NOW'),
+                             date=(self.timespan_start, self.timespan_end),
                              platformname='Sentinel-5 Precursor',
                              producttype='L2__CO____', )
         # Check if any products were found
@@ -45,12 +48,18 @@ class Command(BaseCommand):
         i = 0
         for product in products.values():
             i += 1
+            filename = product['identifier']
             if kwargs['force']:
-                os.remove(os.path.join(download_path))
-            elif product['filename'] in os.listdir(download_path):
+                try:
+                    os.remove(os.path.join(download_path))
+                except Exception:
+                    pass
+            elif not kwargs['force'] and product['filename'] in os.listdir(download_path):
                 print('already downloaded Sentinel-5P data')
                 continue
-            product_info = api.get_product_odata(product['uuid'])
+            elif not kwargs['force'] and Sentinel5PData.objects.filter(filename=filename).exists():
+                print('already imported Sentinel-5P data')
+                continue
             print(f'Donwloading {i}/{len(products)}')
             api.download(product['uuid'], directory_path=download_path)
         print('all Sentinel-5P data downloaded successfully.')
