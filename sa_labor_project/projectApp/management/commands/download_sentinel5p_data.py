@@ -15,7 +15,7 @@ class Command(BaseCommand):
     username = 's5pguest'
     password = 's5pguest'
     url = 'https://s5phub.copernicus.eu/dhus/'
-    timespan_start = 'NOW-10DAYS'
+    timespan_start = 'NOW-3DAYS'
     timespan_end = 'NOW'
 
     def add_arguments(self, parser):

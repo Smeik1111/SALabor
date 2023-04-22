@@ -60,9 +60,9 @@ class Command(BaseCommand):
             for lat_values, long_values, co_values, scanline in zip(lat_scanlines, long_scanlines, co_scanlines,
                                                                 scanline_list):
                 for lat, long, co in zip(lat_values, long_values, co_values):
-                    co_data = CoData(scanline=scanline, latitude=lat, longitude=long, co_value=co)
+                    co_data = CoValue(scanline=scanline, latitude=lat, longitude=long, co_value=co)
                     co_data_list.append(co_data)
-            CoData.objects.bulk_create(co_data_list)
+            CoValue.objects.bulk_create(co_data_list)
             data_package.fully_imported = True
             data_package.save()
             if delete:
