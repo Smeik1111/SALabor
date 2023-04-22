@@ -5,7 +5,7 @@ from .models import Scanline, CoValue, Sentinel5PData
 class CoValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = CoValue
-        fields = ["scanline", "latitude", "longitude", "co_value"]
+        fields = ["latitude", "longitude", "co_value"]
 
 class ScanlineSerializer(serializers.ModelSerializer):
     co_values = CoValueSerializer(many=True, read_only=True)
