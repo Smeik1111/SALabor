@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-6+p^6&xr#@&8b4^fl!!#tgn08#nb)ny1g27n6c5&d#yjv6)^24
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+SILKY_PYTHON_PROFILER = True
 ALLOWED_HOSTS = []
 
 
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'projectApp',
     'rest_framework',
+    'silk',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'sa_labor_project.urls'

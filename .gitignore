@@ -2,3 +2,5 @@
 *.csv
 *.sqlite3
 .idea
+*.sqlite3-journal
+*.nc.incomplete

@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
+from silk.profiling.profiler import silk_profile
+
 from .models import Sentinel5PData,Scanline,CoValue
 from .serializers import Sentinel5PDataSerializer,ScanlineSerializer,CoValueSerializer
 
@@ -12,7 +14,7 @@ class projectAppApiView(APIView):
     # add permission to check if user is authenticated
     permission_classes = [permissions.IsAuthenticated]
 
-    # 1. List all
+    @silk_profile(name='ViewApiGetScanlineByTime')
     def get(self, request, *args, **kwargs):
         #http://127.0.0.1:8000/projectApp/api?start_time=2018-12-28T23:59:59&end_time=2020-11-15T23:59:59
         # time should be in ISO 8601
