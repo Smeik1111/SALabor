@@ -3,6 +3,7 @@ class Command(BaseCommand):
     help = ''
 
     def handle(self, *args, **kwargs):
+
         filename_tropomi = "./averaged.nc"  # "./daily_avg/s5p-CO-L3_avg_20230401.nc"
         # Deutschland: Breitengrad: 47.5 - 54; Längengrad: 6 - 15
         operations_trop = ";".join([
@@ -21,6 +22,7 @@ class Command(BaseCommand):
         crs = 'epsg:4326'
         tropomi = gpd.GeoDataFrame()
         tropomi['geometry'] = None
+        tropomi['date'] = date
         tropomi.crs = crs
         # index for the for loop to go through all TROPOMI pixels
         lat_count = tropomi_CO.latitude_bounds.data.shape[0]
