@@ -17,13 +17,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         delete = True
+        if not os.path.isdir(settings.DAILY_AVERAGE_PATH):
+            os.makedirs(settings.DAILY_AVERAGE_PATH, exist_ok=True)
         done_list = os.path.join(settings.DAILY_AVERAGE_PATH, "days_processed.txt")
         if not os.path.isfile(done_list):
             with open(done_list, 'w') as f:
                 f.write("Days which have been processed:")
-        if not os.path.isdir(settings.DAILY_AVERAGE_PATH):
-            os.makedirs(settings.DAILY_AVERAGE_PATH, exist_ok=True)
-
         file_dict = {}
         for file in os.listdir(settings.IMPORT_PATH):
             date_str = file.split("_")[9].split("T")[0]
