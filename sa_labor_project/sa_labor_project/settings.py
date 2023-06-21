@@ -19,6 +19,7 @@ IMPORT_PATH = os.path.join(DATA_PATH, 'downloads')
 DAILY_AVERAGE_PATH = os.path.join(DATA_PATH, 'daily_average')
 WEEKLY_AVERAGE_PATH = os.path.join(DATA_PATH, 'weekly_average')
 GEOJSON_PATH = os.path.join(DATA_PATH, 'geojson')
+COUNTRIES_PATH = os.path.join(DATA_PATH, 'countries')
 
 SENTINEL5P_USERNAME = 's5pguest'
 SENTINEL5P_PASSWORD = 's5pguest'

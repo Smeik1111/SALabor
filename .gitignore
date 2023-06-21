@@ -4,3 +4,4 @@
 .idea
 *.sqlite3-journal
 *.nc.incomplete
+data/
