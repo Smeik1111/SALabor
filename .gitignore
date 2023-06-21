@@ -4,4 +4,6 @@
 .idea
 *.sqlite3-journal
 *.nc.incomplete
-data/
+!sa_labor_project/data/
+sa_labor_project/data/*
+!sa_labor_project/data/geojson/
