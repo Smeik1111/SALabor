@@ -18,9 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from projectApp import urls as projectApp_urls
 
+from sa_labor_project import settings
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('projectApp/', include(projectApp_urls)),
     path('silk/', include('silk.urls', namespace='silk')),
+    #path(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

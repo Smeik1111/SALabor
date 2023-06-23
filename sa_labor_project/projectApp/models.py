@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 
@@ -22,3 +24,17 @@ class CoValue(models.Model):
     latitude = models.FloatField(default=float('NaN'))
     longitude = models.FloatField(default=float('NaN'))
     co_value = models.FloatField(null=True, blank=True)
+
+class Country(models.Model):
+    name = models.CharField(max_length=20)
+    oldest_data = models.DateField(default=datetime.max.date())
+    newest_data = models.DateField(default=datetime.min.date())
+
+class GeoJSONFile(models.Model):
+    country = models.ForeignKey(Country, related_name='country', on_delete=models.CASCADE)
+    name = models.CharField(max_length=20)
+    date = models.DateField(default=datetime.max.date())
+    file = models.FileField()
+
+
+

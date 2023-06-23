@@ -6,7 +6,7 @@ import harp
 import geopandas as gpd
 import math
 from sa_labor_project import settings
-
+from shapely.geometry import Polygon
 
 class Command(BaseCommand):
     help = ''
@@ -45,11 +45,39 @@ class Command(BaseCommand):
                     "keep(latitude_bounds,longitude_bounds,CO_column_number_density)",
                     "derive(CO_column_number_density [DU])",
                 ])
-                data = harp.import_product(os.path.join(settings.DAILY_AVERAGE_PATH, file), operations=operations_trop)
-                harp.export_product(data, os.path.join(country_folder_path, f'{date_str}.nc'))
+                tropomi_CO = harp.import_product(os.path.join(settings.DAILY_AVERAGE_PATH, file), operations=operations_trop)
+                tropomi = gpd.GeoDataFrame()
+                tropomi['geometry'] = None
+                tropomi.crs = 'epsg:4326'
+                # index for the for loop to go through all TROPOMI pixels
+                lat_count = tropomi_CO.latitude_bounds.data.shape[0]
+                lon_count = tropomi_CO.longitude_bounds.data.shape[0]
+                #tropomi['date'] = date_str  # none in all features
+                for x in range(lon_count):
+                    print(f"{x}/{lon_count}")
+                    lon_c = tropomi_CO.longitude_bounds.data[x]
+                    for y in range(lat_count):
+                        #tropomi['date'] = date_str  # in properties but not in last one
+
+                        lat_c = tropomi_CO.latitude_bounds.data[y]
+                        coords = [(lon_c[0], lat_c[0]), (lon_c[0], lat_c[1]), (lon_c[1], lat_c[1]), (lon_c[1], lat_c[0]),
+                                  (lon_c[0], lat_c[0])]
+                        poly = Polygon(coords)
+                        id = x * lat_count + (y + 1)
+                        tropomi.loc[id, 'pixel_id'] = id
+                        tropomi.loc[id, 'geometry'] = poly
+                        co_value = tropomi_CO.CO_column_number_density.data[0][y][x]
+                        if math.isnan(co_value):
+                            co_value = 0.0
+                        tropomi.loc[id, 'CO'] = co_value
+                        tropomi['date'] = date_str  # in properties
+                # TODO: add date Files, possibly over json, than export to file
+                tropomi.to_file(os.path.join(country_folder_path, f'{date_str}.geo.json'), driver='GeoJSON')
                 with open(done_list, 'a') as f:
                     f.write('\n' + date_str)
                 continue
+
+
                 exit()
                 data = xarray.open_dataset(os.path.join(settings.DAILY_AVERAGE_PATH, file))
                 area_of_interest = gpd.read_file(os.path.join(settings.GEOJSON_PATH, country_path))
