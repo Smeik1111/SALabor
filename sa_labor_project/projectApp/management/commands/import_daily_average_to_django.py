@@ -1,13 +1,9 @@
-import argparse
+import math
 import os
 from datetime import datetime
 import geopandas as gpd
 import harp
-import pandas
-import xarray as xarray
 from django.core.management import BaseCommand
-from projectApp.models import *
-
 from sa_labor_project import settings
 from projectApp.models import Country, GeoJSONFile
 
@@ -55,8 +51,8 @@ class Command(BaseCommand):
                     country.lon_max = tropomi_CO.longitude_bounds.data[-1][-1]
                     country.lon_count = tropomi_CO["CO_column_number_density"].data.shape[2]
                     country.save()
-                data = tropomi_CO["CO_column_number_density"].data.flatten()
-                GeoJSONFile.objects.update_or_create(country=country,
-                                                     name=file,
-                                                     date=date,
-                                                     data=data)
+                data_with_nan = tropomi_CO["CO_column_number_density"].data.flatten()
+                data = [0 if math.isnan(x) else x for x in data_with_nan]
+                geo_json_file, _ = GeoJSONFile.objects.get_or_create(country=country, date=date)
+                geo_json_file.data = data
+                geo_json_file.save()
