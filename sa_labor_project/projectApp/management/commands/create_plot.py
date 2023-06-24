@@ -4,6 +4,7 @@ class Command(BaseCommand):
     help = 'create plots of available sentinel5p Data'
 
     def handle(self, *args, **kwargs):
+        #depricated
         filename = "./data/S5P_OFFL_L2__CO_____20230401T020618_20230401T034748_28314_03_020500_20230402T155156.nc"
         operations = get_import_operations()
         operations = ";".join([

@@ -8,6 +8,6 @@ from .views import (
 
 urlpatterns = [
     path('api', projectAppApiView.as_view()),
-    path('countries/<str:country>/files/', GeoJSONFilesAPIView.as_view(), name='files'),
+    path('countries/<str:country>/', GeoJSONFilesAPIView.as_view(), name='files'),
     path('countries/', CountriesAPIView.as_view(), name='countries'),
 ]

@@ -15,6 +15,7 @@ class Command(BaseCommand):
     help = 'Imports all refs to countrie files to db'
 
     def handle(self, *args, **kwargs):
+        #depricated
         path = settings.COUNTRIES_PATH
         for dir in os.listdir(path):
             country, _ = Country.objects.get_or_create(name=dir)
