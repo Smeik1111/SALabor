@@ -7,6 +7,7 @@ from rest_framework import views
 from rest_framework.response import Response
 from .serializers import GeoJSONFileSerializer, CountrySerializer, AnswerSerializer, CountryBorderSerializer
 from .models import GeoJSONFile, Country
+from django.shortcuts import render
 
 
 class projectAppApiView(APIView):
@@ -39,3 +40,7 @@ class GeoJSONFilesAPIView(views.APIView):
         })
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class HomepageView(views.APIView):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'index.html', context=None)

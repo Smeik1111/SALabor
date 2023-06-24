@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from projectApp import urls as projectApp_urls
+from django.conf.urls.static import static
 
 from sa_labor_project import settings
 
@@ -26,4 +27,5 @@ urlpatterns = [
     path('projectApp/', include(projectApp_urls)),
     path('silk/', include('silk.urls', namespace='silk')),
     #path(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
