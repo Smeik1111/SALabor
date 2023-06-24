@@ -35,13 +35,13 @@ export const TimeIntervalControl = L.Control.extend({
         return this.container;
     },
 
-    update(datasets, createLayer) {
+    update(datasets, dates, createLayer) {
         //console.log('datasets ' + JSON.stringify(datasets));
         if (!datasets || datasets.length === 0) {
             console.error('No geojson datasets');
             return;
         }
-        let dates = datasets.map(geo => geo.date).filter(date => date);
+        //let dates = datasets.map(geo => geo.date).filter(date => date);
         if (!dates ||dates.length === 0) dates = Array(datasets.length).fill().map((element, index) => "Tag " + (index + 1))
         console.log(dates);
 
@@ -90,6 +90,8 @@ export const TimeIntervalControl = L.Control.extend({
 
 export const QueryDataFormControl = L.Control.extend({
     form: undefined,
+    optionConfig: undefined,
+    tooltip: undefined,
 
     onAdd: function (map) {
         const div = L.DomUtil.create('div', 'control');
@@ -98,20 +100,22 @@ export const QueryDataFormControl = L.Control.extend({
         const countryInputContainer = L.DomUtil.create('div', 'inputFieldContainer');
         countryInputContainer.innerHTML = `
             <label for="country">Land</label>
-            <select name="Land" id="country">
-                <option value="germany">Deutschland</option>
-                <option value="china">China</option>
+            <select name="country" id="country" required>
+                <option disabled selected value> -- Land auswählen -- </option>
             </select>
         `;
+                // <option value="germany">Deutschland</option>
+                // <option value="canada">Kanada</option>
+                // <option value="belgium">Belgien</option>
         const startInputContainer = L.DomUtil.create('div', 'inputFieldContainer');
         startInputContainer.innerHTML = `
             <label for="start">Von</label>
-            <input type="date" id="start" name="data-start" value="2023-05-30" min="2023-05-30" max="2023-06-18"/>
+            <input type="date" id="start" name="start-date" value="2023-05-30" min="2023-05-30" max="2023-06-18"/>
         `;
         const endInputContainer = L.DomUtil.create('div', 'inputFieldContainer');
         endInputContainer.innerHTML = `
             <label for="end">Bis</label>
-            <input type="date" id="end" name="data-end" value="2023-05-31" min="2023-05-31" max="2023-06-18"/>
+            <input type="date" id="end" name="end-date" value="2023-05-31" min="2023-05-31" max="2023-06-18"/>
         `;
         const queryContainer = L.DomUtil.create('div', 'inputFieldContainer');
 
@@ -126,9 +130,30 @@ export const QueryDataFormControl = L.Control.extend({
         this.form.appendChild(startInputContainer)
         this.form.appendChild(endInputContainer)
         this.form.appendChild(queryContainer);
+        this.form.appendChild(L.DomUtil.create('div', 'error'));
+
 
         div.appendChild(this.form);
         return div;
+    },
+    setCountryOptions(optionConfig) {
+        const selectCountries = this.form.querySelector('#country');
+        selectCountries.addEventListener('change', (e) => {
+            const selectedValue = e.target.selectedOptions.item(0).value;
+            const optionData = this.optionConfig.find(optionData => optionData.name === selectedValue);
+            this.tooltip = L.DomUtil.create('div');
+            this.tooltip.innerHTML = `<span class="tooltiptext">Verfübarer Datenzeitraum:</br> ${optionData.oldest_data.replaceAll('-', '.')} - ${optionData.newest_data.replaceAll('-', '.')}</span>`;
+            e.target.parentElement.appendChild(this.tooltip);
+            console.log(optionData);
+        });
+        this.optionConfig = optionConfig;
+        console.log(optionConfig);
+        const countries = optionConfig.map(optionData => optionData.name);
+
+        for (let country of countries) {
+            selectCountries.innerHTML += `<option value="${country}">${(country.charAt(0).toUpperCase() + country.slice(1))}</option>`
+            console.log(country);
+        }
     },
     _createQueryDataEvent() {
         this.dispatchEvent(

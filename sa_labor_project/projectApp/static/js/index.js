@@ -1,7 +1,7 @@
-import { baseMaps } from '../base_maps.js';
-import { TimeIntervalControl, QueryDataFormControl, InfoControl, LegendControl } from '../controls.js';
-import { style } from '../rasterStyling.js';
-import { colorGrades, grades, countriesUrl } from '../constants.js'
+import { baseMaps } from './base_maps.js';
+import { TimeIntervalControl, QueryDataFormControl, InfoControl, LegendControl } from './controls.js';
+import { style } from './rasterStyling.js';
+import { colorGrades, grades, countriesUrl } from './constants.js'
 
 const map = L.map('map',
     {
@@ -31,53 +31,55 @@ formControl.form.addEventListener('queryData', queryData);
 const timeIntervalControl = new TimeIntervalControl({ position: 'bottomleft' });
 timeIntervalControl.addTo(map);
 
+// Was wenn es keine Länder gibt?
+fetch(countriesUrl)
+.then((res) => res.json())
+.then((json) => formControl.setCountryOptions(json));
+
 
 function queryData() {
-    // TODO: Aus querDataForm.from die Parameter auslesen
-    formControl.form;
+    const formData = new FormData(formControl.form);
+    if (!formControl.form.checkValidity()) {
+        formControl.form.querySelector(".error").innerHTML = "<span>Bitte alle Felder ausfüllen</span>";
+    } else {
+        formControl.form.querySelector(".error").innerHTML= "";
+    }
 
-    // Country, start, end, global
-    const country = 'canada';
-    const startDate = '2023-05-30';
-    const endDate = '2023-05-31';
-
-    //Y
+    const country = formData.get('country');
+    const startDate = formData.get('start-date');
+    const endDate = formData.get('end-date');
 
     const queryUrl = countriesUrl + '/' + country + '?start_date=' + startDate + '&end_date=' + endDate;
     console.log(queryUrl);
-    // request options
-    const options = {
-        method: 'POST',
-    };
-    // send POST request
+
     fetch(queryUrl)
         .then((res) => res.json())
         .then(res => {
-            if (res) {
-                // TODO: Keine Daten! => Dann Land anfrangen!
-            }
-            const geoJsons = res.map(dailyData => {
-                const date = dailyData.date;
-                const coValues = dailyData.data;
-                console.log(coValues);
-
+            // Was bei Änderungen der Datenstruktur?
+            const { config, values } = res;
+            //console.log(res);
+            const dates = values.map(dailyData => dailyData.date);
+            const geoJsons = values.map(dailyData => {
+                const coValues = JSON.parse(dailyData.data);
                 // Features berechen
                 // { "type": "Feature", "properties": { "pixel_id": 1.0, "CO": 75.024267662118106, }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 2.5, 49.5 ], [ 2.5, 50.0 ], [ 3.0, 50.0 ], [ 3.0, 49.5 ], [ 2.5, 49.5 ] ] ] } },
-                const lat_min = 49.5;
-                const lat_max = 51.5
-                const lat_count = 4;
+                const { lat_min, lat_max, lat_count, lon_min, lon_max, lon_count } = config;
+
+                // const lat_min = 49.5;
+                // const lat_max = 51.5
+                // const lat_count = 4;
                 const lat_inc = (lat_max - lat_min) / lat_count;
-                const long_min = 2.5;
-                const long_max = 6.0;
-                const long_count = 7;
-                const long_inc = (long_max - long_min) / long_count;
+                // const long_min = 2.5;
+                // const long_max = 6.0;
+                // const long_count = 7;
+                const lon_inc = (lon_max - lon_min) / lon_count;
 
                 const features = [];
                 let coValueIdx = 0;
 
-                for (let long = long_min; long < long_max; long += long_inc) {
+                for (let lon = lon_min; lon < lon_max; lon += lon_inc) {
                     for (let lat = lat_min; lat < lat_max; lat += lat_inc) {
-                        const coordinates = [[long, lat], [long, lat + lat_inc], [long + long_inc, lat + lat_inc], [long + long_inc, lat], [long, lat]];
+                        const coordinates = [[lon, lat], [lon, lat + lat_inc], [lon + lon_inc, lat + lat_inc], [lon + lon_inc, lat], [lon, lat]];
                         const feature = {
                             "type": "Feature",
                             "properties": {
@@ -85,7 +87,7 @@ function queryData() {
                             },
                             "geometry": {
                                 "type": "Polygon",
-                                "coordinates": coordinates
+                                "coordinates": [coordinates]
                             }
                         };
                         features.push(feature);
@@ -93,7 +95,7 @@ function queryData() {
                     }
                 }
 
-                console.log(features);
+                //console.log(features);
                 const geoJson = {
                     "type": "FeatureCollection",
                     "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
@@ -101,7 +103,9 @@ function queryData() {
                 };
                 return geoJson;
             });
-            //timeIntervalControl.update(res, createGeoJsonLayer)
+            //console.log(geoJsons);
+            console.log(JSON.stringify(geoJsons[0]));
+            timeIntervalControl.update(geoJsons, dates, createGeoJsonLayer)
         })
         .catch(err => console.log(err));
 }
