@@ -30,7 +30,7 @@ class Command(BaseCommand):
         dates_completely_downloaded = []
         with open(done_list, 'r') as f:
             lines = f.readlines()
-        lines = [line.strip() for line in lines[1:]]
+            lines = [line.strip() for line in lines[1:]]
         for date in file_dict.keys():
             newer = (date + timedelta(days=1))
             older = (date - timedelta(days=1))

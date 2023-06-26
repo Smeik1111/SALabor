@@ -12,8 +12,6 @@ class Command(BaseCommand):
     help = 'Imports all refs to countrie files to db'
 
     def handle(self, *args, **kwargs):
-        #depricated
-        exit(1)
         if not os.path.isdir(settings.COUNTRIES_PATH):
             os.makedirs(settings.COUNTRIES_PATH, exist_ok=True)
         for country_path in os.listdir(settings.GEOJSON_PATH):
@@ -21,10 +19,10 @@ class Command(BaseCommand):
                 continue
             country_name = country_path.removesuffix(".geo.json")
             country, _ = Country.objects.get_or_create(name=country_name)
-            for file in os.listdir(settings.DAILY_AVERAGE_PATH):
+            for file in os.listdir(settings.WEEKLY_AVERAGE_PATH):
                 if file == "days_processed.txt":
                     continue
-                date_str = file.removeprefix("s5p-CO-L3_avg_").removesuffix(".nc")
+                date_str = file.removeprefix("s5p-CO-L4_avg_week_").removesuffix(".nc")
                 area_of_interest = gpd.read_file(os.path.join(settings.GEOJSON_PATH, country_path))
                 xmin, ymin, xmax, ymax = area_of_interest.total_bounds
                 operations_trop = ";".join([

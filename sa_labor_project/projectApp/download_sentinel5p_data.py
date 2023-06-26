@@ -1,7 +1,6 @@
 import os
 from sentinelsat import SentinelAPI, geojson_to_wkt, read_geojson
 
-from projectApp.models import Sentinel5PData
 from sa_labor_project import settings
 
 

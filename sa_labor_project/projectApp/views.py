@@ -27,9 +27,11 @@ class GeoJSONFilesAPIView(views.APIView):
         country = Country.objects.get(name=kwargs['country'])
         if start_date_raw is None or end_date_raw is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        start_date = time_parser.parse(start_date_raw)
-        end_date = time_parser.parse(end_date_raw)
+        try:
+            start_date = time_parser.parse(start_date_raw)
+            end_date = time_parser.parse(end_date_raw)
+        except ValueError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         files_obj = GeoJSONFile.objects.filter(country=country, date__range=(start_date, end_date))
         #serializer = GeoJSONFileSerializer(files_obj, many=True)
         config = "example config"
