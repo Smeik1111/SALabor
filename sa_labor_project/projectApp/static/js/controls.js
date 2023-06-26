@@ -42,8 +42,10 @@ export const TimeIntervalControl = L.Control.extend({
             return;
         }
         //let dates = datasets.map(geo => geo.date).filter(date => date);
-        if (!dates ||dates.length === 0) dates = Array(datasets.length).fill().map((element, index) => "Tag " + (index + 1))
+        if (!dates || dates.length === 0) dates = Array(datasets.length).fill().map((element, index) => "Tag " + (index + 1))
         console.log(dates);
+
+        // TODO: Kartenzentrum aktualisieren
 
         if (this.currLayer) this.currLayer.remove();
         this.currLayer = undefined;
@@ -104,9 +106,9 @@ export const QueryDataFormControl = L.Control.extend({
                 <option disabled selected value> -- Land auswählen -- </option>
             </select>
         `;
-                // <option value="germany">Deutschland</option>
-                // <option value="canada">Kanada</option>
-                // <option value="belgium">Belgien</option>
+        // <option value="germany">Deutschland</option>
+        // <option value="canada">Kanada</option>
+        // <option value="belgium">Belgien</option>
         const startInputContainer = L.DomUtil.create('div', 'inputFieldContainer');
         startInputContainer.innerHTML = `
             <label for="start">Von</label>
@@ -136,24 +138,29 @@ export const QueryDataFormControl = L.Control.extend({
         div.appendChild(this.form);
         return div;
     },
-    setCountryOptions(optionConfig) {
-        const selectCountries = this.form.querySelector('#country');
-        selectCountries.addEventListener('change', (e) => {
-            const selectedValue = e.target.selectedOptions.item(0).value;
-            const optionData = this.optionConfig.find(optionData => optionData.name === selectedValue);
-            this.tooltip = L.DomUtil.create('div');
-            this.tooltip.innerHTML = `<span class="tooltiptext">Verfübarer Datenzeitraum:</br> ${optionData.oldest_data.replaceAll('-', '.')} - ${optionData.newest_data.replaceAll('-', '.')}</span>`;
-            e.target.parentElement.appendChild(this.tooltip);
-            console.log(optionData);
-        });
-        this.optionConfig = optionConfig;
-        console.log(optionConfig);
-        const countries = optionConfig.map(optionData => optionData.name);
+    initSelectField(countriesUrl) {
+        fetch(countriesUrl)
+            .then((res) => res.json())
+            .then((optionConfig) => {
+                const selectCountries = this.form.querySelector('#country');
+                selectCountries.addEventListener('change', (e) => {
+                    const selectedValue = e.target.selectedOptions.item(0).value;
+                    const optionData = this.optionConfig.find(optionData => optionData.name === selectedValue);
+                    this.tooltip = L.DomUtil.create('div');
+                    this.tooltip.innerHTML = `<span class="tooltiptext">Verfübarer Datenzeitraum:</br> ${optionData.oldest_data.replaceAll('-', '.')} - ${optionData.newest_data.replaceAll('-', '.')}</span>`;
+                    e.target.parentElement.appendChild(this.tooltip);
+                    console.log(optionData);
+                });
+                this.optionConfig = optionConfig;
+                console.log(optionConfig);
+                const countries = optionConfig.map(optionData => optionData.name);
 
-        for (let country of countries) {
-            selectCountries.innerHTML += `<option value="${country}">${(country.charAt(0).toUpperCase() + country.slice(1))}</option>`
-            console.log(country);
-        }
+                for (let country of countries) {
+                    selectCountries.innerHTML += `<option value="${country}">${(country.charAt(0).toUpperCase() + country.slice(1))}</option>`
+                    console.log(country);
+                }
+            })
+            .catch(err => console.log(err));
     },
     _createQueryDataEvent() {
         this.dispatchEvent(

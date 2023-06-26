@@ -31,16 +31,14 @@ formControl.form.addEventListener('queryData', queryData);
 const timeIntervalControl = new TimeIntervalControl({ position: 'bottomleft' });
 timeIntervalControl.addTo(map);
 
-// Was wenn es keine Länder gibt?
-fetch(countriesUrl)
-.then((res) => res.json())
-.then((json) => formControl.setCountryOptions(json));
+formControl.initSelectField(countriesUrl);
 
 
 function queryData() {
     const formData = new FormData(formControl.form);
     if (!formControl.form.checkValidity()) {
         formControl.form.querySelector(".error").innerHTML = "<span>Bitte alle Felder ausfüllen</span>";
+        return;
     } else {
         formControl.form.querySelector(".error").innerHTML= "";
     }
@@ -55,23 +53,14 @@ function queryData() {
     fetch(queryUrl)
         .then((res) => res.json())
         .then(res => {
-            // Was bei Änderungen der Datenstruktur?
             const { config, values } = res;
-            //console.log(res);
             const dates = values.map(dailyData => dailyData.date);
             const geoJsons = values.map(dailyData => {
                 const coValues = JSON.parse(dailyData.data);
                 // Features berechen
                 // { "type": "Feature", "properties": { "pixel_id": 1.0, "CO": 75.024267662118106, }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 2.5, 49.5 ], [ 2.5, 50.0 ], [ 3.0, 50.0 ], [ 3.0, 49.5 ], [ 2.5, 49.5 ] ] ] } },
                 const { lat_min, lat_max, lat_count, lon_min, lon_max, lon_count } = config;
-
-                // const lat_min = 49.5;
-                // const lat_max = 51.5
-                // const lat_count = 4;
                 const lat_inc = (lat_max - lat_min) / lat_count;
-                // const long_min = 2.5;
-                // const long_max = 6.0;
-                // const long_count = 7;
                 const lon_inc = (lon_max - lon_min) / lon_count;
 
                 const features = [];
@@ -95,7 +84,6 @@ function queryData() {
                     }
                 }
 
-                //console.log(features);
                 const geoJson = {
                     "type": "FeatureCollection",
                     "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
@@ -103,8 +91,7 @@ function queryData() {
                 };
                 return geoJson;
             });
-            //console.log(geoJsons);
-            console.log(JSON.stringify(geoJsons[0]));
+            //console.log(JSON.stringify(geoJsons[0]));
             timeIntervalControl.update(geoJsons, dates, createGeoJsonLayer)
         })
         .catch(err => console.log(err));
